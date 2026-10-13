@@ -1,0 +1,6 @@
+{
+  "name": "NetScope Pro - Advanced Network Engineering & Diagnostic Suite",
+  "description": "Professional network toolkit with IPv4/IPv6 subnet calculators, CIDR & class breakdown, real-time DNS & IP intelligence, uptime monitoring, port testing, traceroute, automated speed benchmarks, OAuth 2.0 sessions, and exportable PDF/CSV reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
