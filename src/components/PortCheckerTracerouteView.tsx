@@ -25,11 +25,13 @@ export const PortCheckerTracerouteView: React.FC = () => {
   const [customPortsInput, setCustomPortsInput] = useState('80, 443, 8080, 8443');
   const [portResults, setPortResults] = useState<PortCheckResult[]>([]);
   const [loadingPorts, setLoadingPorts] = useState(false);
+  const [portError, setPortError] = useState<string | null>(null);
 
   // Traceroute States
   const [traceTarget, setTraceTarget] = useState('8.8.8.8');
   const [traceHops, setTraceHops] = useState<TracerouteHop[]>([]);
   const [loadingTrace, setLoadingTrace] = useState(false);
+  const [traceError, setTraceError] = useState<string | null>(null);
   const [traceSummary, setTraceSummary] = useState<{ destinationIp: string; averageRttMs: number } | null>(null);
 
   const getPortsForPreset = () => {
@@ -52,34 +54,44 @@ export const PortCheckerTracerouteView: React.FC = () => {
     }
   };
 
-  const executePortScan = async () => {
+  const executePortScan = async (overrideHost?: string) => {
+    const target = overrideHost || portHost;
+    if (!target) return;
     setLoadingPorts(true);
+    setPortError(null);
     const ports = getPortsForPreset();
     try {
       const res = await fetch('/api/v1/port-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host: portHost, ports }),
+        body: JSON.stringify({ host: target, ports }),
       });
+      if (!res.ok) throw new Error(`Probe failed with status ${res.status}`);
       const data = await res.json();
       if (data.results) {
         setPortResults(data.results);
+      } else {
+        throw new Error(data.error || 'No results returned');
       }
-    } catch {
-      //
+    } catch (err: any) {
+      setPortError(err.message || 'Port probe connection timed out');
     } finally {
       setLoadingPorts(false);
     }
   };
 
-  const executeTraceroute = async () => {
+  const executeTraceroute = async (overrideTarget?: string) => {
+    const target = overrideTarget || traceTarget;
+    if (!target) return;
     setLoadingTrace(true);
+    setTraceError(null);
     try {
       const res = await fetch('/api/v1/traceroute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target: traceTarget }),
+        body: JSON.stringify({ target }),
       });
+      if (!res.ok) throw new Error(`Traceroute failed with status ${res.status}`);
       const data = await res.json();
       if (data.hops) {
         setTraceHops(data.hops);
@@ -87,13 +99,21 @@ export const PortCheckerTracerouteView: React.FC = () => {
           destinationIp: data.destinationIp,
           averageRttMs: data.averageRttMs,
         });
+      } else {
+        throw new Error(data.error || 'Failed to map route hops');
       }
-    } catch {
-      //
+    } catch (err: any) {
+      setTraceError(err.message || 'Traceroute packet path timeout');
     } finally {
       setLoadingTrace(false);
     }
   };
+
+  // Auto-run initial diagnostic probes on mount
+  React.useEffect(() => {
+    executePortScan('1.1.1.1');
+    executeTraceroute('8.8.8.8');
+  }, []);
 
   const handleExportPortsCsv = () => {
     const rows = [
@@ -176,7 +196,7 @@ export const PortCheckerTracerouteView: React.FC = () => {
 
               <div className="sm:col-span-4 flex items-end">
                 <button
-                  onClick={executePortScan}
+                  onClick={() => executePortScan()}
                   disabled={loadingPorts}
                   className="w-full py-2.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
                 >
@@ -231,6 +251,22 @@ export const PortCheckerTracerouteView: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Port Error Alert */}
+          {portError && (
+            <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                <span>{portError}</span>
+              </div>
+              <button
+                onClick={() => executePortScan()}
+                className="px-3 py-1 bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-800 rounded font-medium hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors"
+              >
+                Retry Probe
+              </button>
+            </div>
+          )}
 
           {/* Port Results Table */}
           {portResults.length > 0 && (
@@ -319,7 +355,7 @@ export const PortCheckerTracerouteView: React.FC = () => {
 
               <div className="sm:col-span-4 flex items-end">
                 <button
-                  onClick={executeTraceroute}
+                  onClick={() => executeTraceroute()}
                   disabled={loadingTrace}
                   className="w-full py-2.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
                 >
@@ -333,6 +369,22 @@ export const PortCheckerTracerouteView: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Traceroute Error Alert */}
+          {traceError && (
+            <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-xs flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                <span>{traceError}</span>
+              </div>
+              <button
+                onClick={() => executeTraceroute()}
+                className="px-3 py-1 bg-white dark:bg-slate-900 border border-rose-300 dark:border-rose-800 rounded font-medium hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors"
+              >
+                Retry Trace
+              </button>
+            </div>
+          )}
 
           {traceHops.length > 0 && (
             <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">

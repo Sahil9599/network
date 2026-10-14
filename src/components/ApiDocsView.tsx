@@ -160,7 +160,7 @@ export const ApiDocsView: React.FC = () => {
   };
 
   // Generate code snippet
-  const activeKeySample = keys[0]?.key || 'YOUR_API_KEY_HERE';
+  const activeKeySample = keys[0]?.key || 'ns_live_demo_key';
   const getCodeSnippet = () => {
     const fullUrl = `${window.location.origin}${currentEp.path}`;
     if (codeLang === 'curl') {

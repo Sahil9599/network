@@ -222,12 +222,31 @@ const IpLookupInner: React.FC = () => {
         </div>
 
         {error && (
-          <div className="mt-3 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs border border-rose-200 dark:border-rose-900 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
+          <div className="mt-3 p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs border border-rose-200 dark:border-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setTargetInput('1.1.1.1');
+                fetchIpData('1.1.1.1');
+              }}
+              className="px-2.5 py-1 rounded bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/60 dark:hover:bg-rose-900 text-rose-700 dark:text-rose-200 font-semibold text-xs shrink-0 self-start sm:self-auto transition-colors"
+            >
+              Reset to 1.1.1.1
+            </button>
           </div>
         )}
       </div>
+
+      {loading && !data && (
+        <div className="p-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-center space-y-3">
+          <div className="w-8 h-8 mx-auto border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="text-xs font-mono text-slate-500">Querying IP intelligence and physical geolocation...</div>
+        </div>
+      )}
 
       {data && (
         <div className="space-y-6">
