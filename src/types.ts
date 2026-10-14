@@ -205,12 +205,6 @@ export interface PracticeLab {
 }
 
 export type ActiveToolTab =
-  | 'dashboard'
-  | 'subnet'
   | 'cisco-sim'
-  | 'ip-lookup'
-  | 'dns'
-  | 'uptime'
-  | 'port-trace'
-  | 'speedtest'
-  | 'api-developer';
+  | 'subnet'
+  | 'dashboard';

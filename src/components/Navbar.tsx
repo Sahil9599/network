@@ -4,13 +4,8 @@ import {
   Sun,
   Moon,
   ShieldCheck,
-  Cpu,
-  Globe,
-  Radio,
-  Activity,
   Layers,
   Terminal,
-  Gauge,
   Key,
 } from 'lucide-react';
 import { ActiveToolTab, UserProfile } from '../types';
@@ -35,15 +30,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   systemStatus,
 }) => {
   const navItems: { id: ActiveToolTab; label: string; icon: React.ReactNode }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <Layers className="w-4 h-4" /> },
     { id: 'cisco-sim', label: 'Cisco Packet Tracer Lab', icon: <Terminal className="w-4 h-4" /> },
     { id: 'subnet', label: 'Subnet Calc & Classes', icon: <Network className="w-4 h-4" /> },
-    { id: 'ip-lookup', label: 'IP Intelligence', icon: <Globe className="w-4 h-4" /> },
-    { id: 'dns', label: 'DNS Resolver', icon: <Cpu className="w-4 h-4" /> },
-    { id: 'uptime', label: 'Uptime & SSL', icon: <Activity className="w-4 h-4" /> },
-    { id: 'port-trace', label: 'Ports & Route', icon: <Radio className="w-4 h-4" /> },
-    { id: 'speedtest', label: 'Speed Test', icon: <Gauge className="w-4 h-4" /> },
-    { id: 'api-developer', label: 'Developer API', icon: <Terminal className="w-4 h-4" /> },
+    { id: 'dashboard', label: 'Dashboard Overview', icon: <Layers className="w-4 h-4" /> },
   ];
 
   return (

@@ -8,19 +8,13 @@ import { ActiveToolTab, UserProfile } from './types';
 import { Navbar } from './components/Navbar';
 import { DashboardOverview } from './components/DashboardOverview';
 import { SubnetCalculatorView } from './components/SubnetCalculatorView';
-import { IpLookupView } from './components/IpLookupView';
-import { DnsLookupView } from './components/DnsLookupView';
-import { UptimeCheckerView } from './components/UptimeCheckerView';
-import { PortCheckerTracerouteView } from './components/PortCheckerTracerouteView';
-import { SpeedTestView } from './components/SpeedTestView';
-import { ApiDocsView } from './components/ApiDocsView';
 import { CiscoSimulatorView } from './components/CiscoSimulatorView';
 import { OAuthModal } from './components/OAuthModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { ShieldCheck, Terminal, Cpu } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<ActiveToolTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<ActiveToolTab>('cisco-sim');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -79,6 +73,10 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <ErrorBoundary fallbackTitle="View Recovery">
+          {activeTab === 'cisco-sim' && <CiscoSimulatorView />}
+
+          {activeTab === 'subnet' && <SubnetCalculatorView />}
+
           {activeTab === 'dashboard' && (
             <DashboardOverview
               setActiveTab={setActiveTab}
@@ -86,22 +84,6 @@ export default function App() {
               systemStatus={systemStatus}
             />
           )}
-
-          {activeTab === 'cisco-sim' && <CiscoSimulatorView />}
-
-          {activeTab === 'subnet' && <SubnetCalculatorView />}
-
-          {activeTab === 'ip-lookup' && <IpLookupView />}
-
-          {activeTab === 'dns' && <DnsLookupView />}
-
-          {activeTab === 'uptime' && <UptimeCheckerView />}
-
-          {activeTab === 'port-trace' && <PortCheckerTracerouteView />}
-
-          {activeTab === 'speedtest' && <SpeedTestView />}
-
-          {activeTab === 'api-developer' && <ApiDocsView />}
         </ErrorBoundary>
       </main>
 
@@ -113,9 +95,9 @@ export default function App() {
               NetScope PRO
             </span>
             <span>·</span>
-            <span>RFC 1878 Subnetting</span>
+            <span>Cisco Packet Tracer IOS Lab</span>
             <span>·</span>
-            <span>RFC 1035 DNS</span>
+            <span>RFC 1878 Subnetting & Classes</span>
             <span>·</span>
             <span>RFC 6749 OAuth 2.0</span>
           </div>
