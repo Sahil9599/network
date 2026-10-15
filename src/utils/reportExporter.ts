@@ -248,3 +248,70 @@ export function exportUptimeReportPdf(target: string, uptimeData: any) {
 
   doc.save(`NetScope_Uptime_Audit_${Date.now()}.pdf`);
 }
+
+export function exportNetworkInventoryPdf(subnet: string, devices: any[]) {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Primary banner
+  doc.setFillColor(15, 23, 42); // slate-900
+  doc.rect(0, 0, pageWidth, 32, 'F');
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text('NETSCOPE PRO // LAN DEVICE DISCOVERY AUDIT', 14, 15);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(148, 163, 184);
+  doc.text(`Subnet: ${subnet} | Total Devices: ${devices.length} | Scanned: ${new Date().toUTCString()}`, 14, 24);
+
+  let y = 44;
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Discovered Hosts & Hardware Addresses (ARP Table)`, 14, y);
+  y += 6;
+
+  // Table header
+  doc.setFillColor(241, 245, 249); // slate-100
+  doc.rect(14, y, pageWidth - 28, 7, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(51, 65, 85);
+  doc.text('IP ADDRESS', 18, y + 5);
+  doc.text('MAC ADDRESS (HARDWARE)', 58, y + 5);
+  doc.text('HOSTNAME / ROLE', 105, y + 5);
+  doc.text('OUI VENDOR', 145, y + 5);
+  doc.text('STATUS', 185, y + 5);
+  y += 10;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+
+  for (const d of devices) {
+    if (y > 275) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setTextColor(15, 23, 42);
+    doc.text(String(d.ip), 18, y);
+    doc.text(String(d.mac), 58, y);
+    doc.text(String(d.hostname || 'Unknown').slice(0, 22), 105, y);
+    doc.text(String(d.vendor || 'Unknown').slice(0, 22), 145, y);
+
+    if (d.status === 'online') {
+      doc.setTextColor(22, 101, 52); // green-800
+      doc.text(`Online (${d.latencyMs}ms)`, 185, y);
+    } else {
+      doc.setTextColor(148, 163, 184);
+      doc.text(String(d.status || 'Offline'), 185, y);
+    }
+
+    y += 5.5;
+  }
+
+  doc.save(`NetScope_Network_Devices_${Date.now()}.pdf`);
+}

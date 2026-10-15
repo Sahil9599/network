@@ -204,7 +204,43 @@ export interface PracticeLab {
   initialLinks: CiscoLink[];
 }
 
+export interface DiscoveredDevice {
+  id: string;
+  ip: string;
+  ipv6?: string;
+  mac: string;
+  macCiscoFormat?: string;
+  hostname: string;
+  vendor: string;
+  deviceType: 'router' | 'switch' | 'server' | 'workstation' | 'mobile' | 'iot' | 'printer' | 'ap';
+  status: 'online' | 'offline' | 'idle';
+  latencyMs: number;
+  openPorts: Array<{ port: number; service: string }>;
+  networkInterface: string;
+  subnetMask: string;
+  firstSeen: number;
+  lastSeen: number;
+  isGateway?: boolean;
+  isSelf?: boolean;
+  packetLoss?: number;
+  ttl?: number;
+  notes?: string;
+}
+
+export interface NetworkScanSummary {
+  subnet: string;
+  netmask: string;
+  gatewayIp: string;
+  totalScanned: number;
+  activeCount: number;
+  idleCount: number;
+  offlineCount: number;
+  scanDurationMs: number;
+  scannedAt: number;
+}
+
 export type ActiveToolTab =
   | 'cisco-sim'
   | 'subnet'
+  | 'device-scanner'
   | 'dashboard';

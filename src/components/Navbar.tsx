@@ -7,6 +7,7 @@ import {
   Layers,
   Terminal,
   Key,
+  Radio,
 } from 'lucide-react';
 import { ActiveToolTab, UserProfile } from '../types';
 
@@ -32,6 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navItems: { id: ActiveToolTab; label: string; icon: React.ReactNode }[] = [
     { id: 'cisco-sim', label: 'Cisco Packet Tracer Lab', icon: <Terminal className="w-4 h-4" /> },
     { id: 'subnet', label: 'Subnet Calc & Classes', icon: <Network className="w-4 h-4" /> },
+    { id: 'device-scanner', label: 'Network Device Scanner (IP & MAC)', icon: <Radio className="w-4 h-4" /> },
     { id: 'dashboard', label: 'Dashboard Overview', icon: <Layers className="w-4 h-4" /> },
   ];
 

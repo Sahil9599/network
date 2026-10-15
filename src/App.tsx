@@ -9,6 +9,7 @@ import { Navbar } from './components/Navbar';
 import { DashboardOverview } from './components/DashboardOverview';
 import { SubnetCalculatorView } from './components/SubnetCalculatorView';
 import { CiscoSimulatorView } from './components/CiscoSimulatorView';
+import { NetworkDeviceScannerView } from './components/NetworkDeviceScannerView';
 import { OAuthModal } from './components/OAuthModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ShieldCheck } from 'lucide-react';
@@ -77,6 +78,12 @@ export default function App() {
 
           {activeTab === 'subnet' && <SubnetCalculatorView />}
 
+          {activeTab === 'device-scanner' && (
+            <NetworkDeviceScannerView
+              onNavigateToTab={(t) => setActiveTab(t as ActiveToolTab)}
+            />
+          )}
+
           {activeTab === 'dashboard' && (
             <DashboardOverview
               setActiveTab={setActiveTab}
@@ -96,6 +103,8 @@ export default function App() {
             </span>
             <span>·</span>
             <span>Cisco Packet Tracer IOS Lab</span>
+            <span>·</span>
+            <span>Network Device Scanner (IP & MAC)</span>
             <span>·</span>
             <span>RFC 1878 Subnetting & Classes</span>
             <span>·</span>
