@@ -225,6 +225,18 @@ export interface DiscoveredDevice {
   packetLoss?: number;
   ttl?: number;
   notes?: string;
+  isReal?: boolean;
+  os?: string;
+  browser?: string;
+  isp?: string;
+  location?: string;
+  geo?: {
+    country?: string;
+    city?: string;
+    isp?: string;
+    org?: string;
+    asn?: string;
+  };
 }
 
 export interface NetworkScanSummary {

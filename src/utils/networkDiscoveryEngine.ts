@@ -46,6 +46,107 @@ export const PRESET_SUBNETS: ScanPresetSubnet[] = [
   },
 ];
 
+export interface BrowserClientIdentity {
+  localIp?: string;
+  osName: string;
+  browserName: string;
+  deviceType: 'workstation' | 'mobile';
+  cpuCores: number;
+  memoryGb?: number;
+  connectionType?: string;
+  screenResolution: string;
+  platform: string;
+}
+
+/**
+ * Detect Real Client Device & Network Identity from Browser APIs & WebRTC
+ */
+export async function detectBrowserClientIdentity(): Promise<BrowserClientIdentity> {
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  let osName = 'Windows PC';
+  let deviceType: 'workstation' | 'mobile' = 'workstation';
+
+  if (/Windows NT 10.0|Windows NT 11.0/i.test(ua)) osName = 'Windows 11 / 10 PC';
+  else if (/Windows NT 6.3/i.test(ua)) osName = 'Windows 8.1 PC';
+  else if (/Windows NT 6.1/i.test(ua)) osName = 'Windows 7 PC';
+  else if (/Macintosh|Mac OS X/i.test(ua)) {
+    osName = 'Apple Mac';
+    if (/iPhone/i.test(ua)) {
+      osName = 'Apple iPhone';
+      deviceType = 'mobile';
+    } else if (/iPad/i.test(ua)) {
+      osName = 'Apple iPad';
+      deviceType = 'mobile';
+    }
+  } else if (/Android/i.test(ua)) {
+    osName = 'Android Mobile';
+    deviceType = 'mobile';
+  } else if (/Linux/i.test(ua)) {
+    osName = 'Linux Workstation';
+  }
+
+  let browserName = 'Web Browser';
+  if (/Edg\//i.test(ua)) browserName = 'Microsoft Edge';
+  else if (/Chrome\//i.test(ua)) browserName = 'Google Chrome';
+  else if (/Firefox\//i.test(ua)) browserName = 'Mozilla Firefox';
+  else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browserName = 'Apple Safari';
+
+  const cpuCores = typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 4) : 4;
+  const memoryGb = typeof navigator !== 'undefined' ? ((navigator as any).deviceMemory || undefined) : undefined;
+  const connectionType = typeof navigator !== 'undefined' ? ((navigator as any).connection?.effectiveType || undefined) : undefined;
+  const screenResolution = typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : '1920x1080';
+  const platform = typeof navigator !== 'undefined' ? (navigator.platform || 'Desktop') : 'Desktop';
+
+  // Extract WebRTC Local IP candidate if supported
+  let localIp: string | undefined = undefined;
+  try {
+    if (typeof RTCPeerConnection !== 'undefined') {
+      const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+      pc.createDataChannel('');
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      await new Promise<void>((resolve) => {
+        const timer = setTimeout(() => {
+          try { pc.close(); } catch {}
+          resolve();
+        }, 1200);
+
+        pc.onicecandidate = (event) => {
+          if (!event || !event.candidate) {
+            clearTimeout(timer);
+            try { pc.close(); } catch {}
+            resolve();
+            return;
+          }
+          const cand = event.candidate.candidate;
+          const match = cand.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+          if (match && match[1] && !match[1].startsWith('127.')) {
+            localIp = match[1];
+            clearTimeout(timer);
+            try { pc.close(); } catch {}
+            resolve();
+          }
+        };
+      });
+    }
+  } catch {
+    // WebRTC candidates may be restricted by client privacy
+  }
+
+  return {
+    localIp,
+    osName,
+    browserName,
+    deviceType,
+    cpuCores,
+    memoryGb,
+    connectionType,
+    screenResolution,
+    platform,
+  };
+}
+
 /**
  * Generate a realistic set of discovered devices for a given subnet prefix
  */
